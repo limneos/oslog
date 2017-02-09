@@ -1,3 +1,15 @@
+//===-- main.mm -------------------------------------*- C ---*-===//
+//
+//  Author: Elias Limneos
+//
+//         A tool for showing os_log activity on iOS devices
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+
+
 #include <dlfcn.h>
 #include <signal.h>
 #include <sys/types.h>
