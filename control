@@ -1,0 +1,10 @@
+Package: net.limneos.oslog
+Name: oslog
+Depends: 
+Version: 0.0.1
+Architecture: iphoneos-arm
+Description: os_log implementation for iOS
+Maintainer: Elias Limneos
+Author: Elias Limneos
+Section: System
+Tag: role::hacker
