@@ -10,7 +10,13 @@
 	<true/>
 	<key>platform-application</key>
 	<true/>
-	
+	<key>com.apple.private.debug_port</key>
+	<true/>
+	<key>com.apple.private.logging.admin</key>
+	<true/>
+	<key>com.apple.private.logging.diagnostic</key>
+	<true/>
+	<key>com.apple.private.logging.stream</key>
+	<true/>
 </dict>
 </plist>
-

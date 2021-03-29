@@ -191,7 +191,7 @@ static void NoteExitKQueueCallback(CFFileDescriptorRef f,CFOptionFlags callBackT
 {
     struct kevent   event;
     (void) kevent( CFFileDescriptorGetNativeDescriptor(f), NULL, 0, &event, 1, NULL);
-    NSLog(@" === os_log: monitored pid [%d] terminated", (int) (pid_t) event.ident);
+    NSLog(@" === oslog: monitored pid [%d] terminated", (int) (pid_t) event.ident);
     exit(0);
     // You've been notified!
 }
@@ -200,7 +200,7 @@ int main(int argc, char **argv, char **envp) {
 
 
 	if (!LookupSPICalls()){
-		printf("\tError: Could not find os_log required functions. iOS >=10 is required.\n");
+		printf("\tError: Could not find oslog required functions. iOS >=10 is required.\n");
 		return -1;
 	}
 
@@ -222,22 +222,22 @@ int main(int argc, char **argv, char **envp) {
 				strftime(timebuffer,30,"%b %e %T",localtime(&curtime));
 				char hostname[64];
 				gethostname(hostname,sizeof(hostname));
-			  	printf("%s %s: === os_log stream started ===\n",timebuffer,hostname);
+			  	printf("%s %s: === oslog stream started ===\n",timebuffer,hostname);
 			  	canPrint=YES;
 			  	break;
 			case OS_ACTIVITY_STREAM_EVENT_STOPPED:
 			 	//printf("received stream event: OS_ACTIVITY_STREAM_EVENT_STOPPED, stream %p.\n",(void *)stream);
-				printf("=== os_log stream stopped ===\n");
+				printf("=== oslog stream stopped ===\n");
 			  	break;
 			case OS_ACTIVITY_STREAM_EVENT_FAILED:
-				printf("=== os_log stream failed ===\n");
+				printf("=== oslog stream failed ===\n");
 			 	//printf("received stream event: OS_ACTIVITY_STREAM_EVENT_FAILED, stream %p.\n",(void *)stream);
 			 	break;
 			case OS_ACTIVITY_STREAM_EVENT_CHUNK_STARTED:
 			 	//printf("received stream event: OS_ACTIVITY_STREAM_EVENT_CHUNK_STARTED, stream %p.\n",(void *)stream);
 			 	break;
 			case OS_ACTIVITY_STREAM_EVENT_CHUNK_FINISHED:
-				printf("=== os_log stream chunk finished ===\n");
+				printf("=== oslog stream chunk finished ===\n");
 			 	//printf("received stream event: OS_ACTIVITY_STREAM_EVENT_CHUNK_FINISHED, stream %p.\n",(void *)stream);
 			  	break;
 			  	
