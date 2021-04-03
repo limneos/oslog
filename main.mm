@@ -173,10 +173,10 @@ BOOL handleStreamEntry(os_activity_stream_entry_t entry, int error){
 
 				//printf("%s %s "BOLDWHITE"%s(%s)"RESET"[%d]: %s\n",timebuffer,hostname,(char *)procname,category,entry->pid,message);
 				if(category && subsystemInfo){
-					printf("%s %s %s(%s.%s)[%d]%s: %s\n",timebuffer,hostname,(char *)procname,subsystem,category,entry->pid,levelInfo?level:"",messageText);
+					printf("%s %s ""\033[1;36m""%s(%s.%s)""033[0m""[%d]%s: %s\n",timebuffer,hostname,(char *)procname,subsystem,category,entry->pid,levelInfo?level:"",messageText);
 				}
 				else{
-					printf("%s %s %s[%d]%s: %s\n",timebuffer,hostname,(char *)procname,entry->pid,levelInfo?level:"",messageText);
+					printf("%s %s ""\033[1;36m""%s""033[0m""[%d]%s: %s\n",timebuffer,hostname,(char *)procname,entry->pid,levelInfo?level:"",messageText);
 				}
 				
 			}
