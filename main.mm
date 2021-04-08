@@ -1,23 +1,11 @@
-//===-- main.mm -------------------------------------*- C ---*-===//
-//
-//  Author: Elias Limneos
-//
-//         A tool for showing os_log activity on iOS devices
-//
-// This file is distributed under the University of Illinois Open Source
-// License. See LICENSE.TXT for details.
-//
-//===----------------------------------------------------------------------===//
-
-
 #include <dlfcn.h>
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/event.h>
 #include <sys/time.h>
 #include "ActivityStreamAPI.h"
-//#define RESET   "\033[0m"
-//#define BOLDWHITE   "\033[1m\033[37m" 
+#define RESET   "\033[0m"
+#define BOLDWHITE   "\033[1m\033[37m"
 
 static BOOL canPrint=NO;
 static int filterPid=-1;
@@ -34,7 +22,7 @@ static int (*m_proc_listpids)(uint32_t type, uint32_t typeinfo, void *buffer, in
 
 
 void printUsage(){
-	printf("usage:\noslog [--info|--debug] [ -p pid ] [--noLevelInfo] [--noSubsystemInfo]\n\n Examples:\n\toslog \n\toslog --debug\n\toslog -p SpringBoard\n\n");
+	printf("\x1b[0mUsage: oslog [--info|--debug] [ -p pid ] [--noLevelInfo] [--noSubsystemInfo]\n");
 }
 
 
@@ -173,10 +161,10 @@ BOOL handleStreamEntry(os_activity_stream_entry_t entry, int error){
 
 				//printf("%s %s "BOLDWHITE"%s(%s)"RESET"[%d]: %s\n",timebuffer,hostname,(char *)procname,category,entry->pid,message);
 				if(category && subsystemInfo){
-					printf("%s %s ""\033[1;36m""%s(%s.%s)""033[0m""[%d]%s: %s\n",timebuffer,hostname,(char *)procname,subsystem,category,entry->pid,levelInfo?level:"",messageText);
+					printf("%s %s ""\033[1;36m""%s(%s.%s)""\033[1;37m""[%d]%s: %s\x1b[0m\n",timebuffer,hostname,(char *)procname,subsystem,category,entry->pid,levelInfo?level:"",messageText);
 				}
 				else{
-					printf("%s %s ""\033[1;36m""%s""033[0m""[%d]%s: %s\n",timebuffer,hostname,(char *)procname,entry->pid,levelInfo?level:"",messageText);
+					printf("%s %s ""\033[1;36m""%s""\033[1;37m""[%d]%s: %s\x1b[0m\n",timebuffer,hostname,(char *)procname,entry->pid,levelInfo?level:"",messageText);
 				}
 				
 			}
@@ -222,22 +210,22 @@ int main(int argc, char **argv, char **envp) {
 				strftime(timebuffer,30,"%b %e %T",localtime(&curtime));
 				char hostname[64];
 				gethostname(hostname,sizeof(hostname));
-			  	printf("%s %s: === oslog stream started ===\n",timebuffer,hostname);
+			  	printf("%s %s: ======\n",timebuffer,hostname);
 			  	canPrint=YES;
 			  	break;
 			case OS_ACTIVITY_STREAM_EVENT_STOPPED:
 			 	//printf("received stream event: OS_ACTIVITY_STREAM_EVENT_STOPPED, stream %p.\n",(void *)stream);
-				printf("=== oslog stream stopped ===\n");
+				printf("======\n");
 			  	break;
 			case OS_ACTIVITY_STREAM_EVENT_FAILED:
-				printf("=== oslog stream failed ===\n");
+				printf("======\n");
 			 	//printf("received stream event: OS_ACTIVITY_STREAM_EVENT_FAILED, stream %p.\n",(void *)stream);
 			 	break;
 			case OS_ACTIVITY_STREAM_EVENT_CHUNK_STARTED:
 			 	//printf("received stream event: OS_ACTIVITY_STREAM_EVENT_CHUNK_STARTED, stream %p.\n",(void *)stream);
 			 	break;
 			case OS_ACTIVITY_STREAM_EVENT_CHUNK_FINISHED:
-				printf("=== oslog stream chunk finished ===\n");
+				printf("======\n");
 			 	//printf("received stream event: OS_ACTIVITY_STREAM_EVENT_CHUNK_FINISHED, stream %p.\n",(void *)stream);
 			  	break;
 			  	
