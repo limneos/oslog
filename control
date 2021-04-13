@@ -1,6 +1,6 @@
 Package: net.limneos.oslog
 Name: oslog
-Version: 0.0.2
+Version: 0.0.4
 Architecture: iphoneos-arm
 Description: os_log implementation for iOS
 Maintainer: daniel
