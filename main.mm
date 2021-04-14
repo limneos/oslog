@@ -20,7 +20,7 @@ static int (*m_proc_listpids)(uint32_t type, uint32_t typeinfo, void *buffer, in
 
 
 void printUsage(){
-	printf("\x1b[0musage: oslog [--info|--debug] [-p <pid|name>] [--noLevelInfo] [--noSubsystemInfo]\n");
+	printf("\033[1;36mUsage: \033[1;37moslog [--info|--debug] [-p <pid|name>] [--noLevelInfo] [--noSubsystemInfo]\x1b[0m\n");
 }
 
 
