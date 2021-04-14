@@ -1,6 +1,6 @@
 include $(THEOS)/makefiles/common.mk
 
-ARCHS = arm64 arm64e
+ARCHS = armv7 arm64 arm64e
 
 TOOL_NAME = oslog
 oslog_FILES = main.mm
