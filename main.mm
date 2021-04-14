@@ -1,23 +1,9 @@
-//===-- main.mm -------------------------------------*- C ---*-===//
-//
-//  Author: Elias Limneos
-//
-//         A tool for showing os_log activity on iOS devices
-//
-// This file is distributed under the University of Illinois Open Source
-// License. See LICENSE.TXT for details.
-//
-//===----------------------------------------------------------------------===//
-
-
 #include <dlfcn.h>
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/event.h>
 #include <sys/time.h>
 #include "ActivityStreamAPI.h"
-//#define RESET   "\033[0m"
-//#define BOLDWHITE   "\033[1m\033[37m" 
 
 static BOOL canPrint=NO;
 static int filterPid=-1;
@@ -34,11 +20,11 @@ static int (*m_proc_listpids)(uint32_t type, uint32_t typeinfo, void *buffer, in
 
 
 void printUsage(){
-	printf("usage:\noslog [--info|--debug] [ -p pid ] [--noLevelInfo] [--noSubsystemInfo]\n\n Examples:\n\toslog \n\toslog --debug\n\toslog -p SpringBoard\n\n");
+	printf("\033[1;36mUsage: \033[1;37moslog [--info|--debug] [-p <pid|name>] [--noLevelInfo] [--noSubsystemInfo]\x1b[0m\n");
 }
 
 
-struct ActivityInfo { // to be used in OS_ACTIVITY_STREAM_TYPE_ACTIVITY_CREATE and gather activity ids->names
+struct ActivityInfo {
     ActivityInfo(const char *name, os_activity_id_t activity_id,
                  os_activity_id_t parent_activity_id)
         : m_name(name), m_id(activity_id), m_parent_id(parent_activity_id) {}
@@ -76,7 +62,6 @@ bool LookupSPICalls() {
 }
 
 
-//NSMutableArray *activityMap=nil;
 
 BOOL handleStreamEntry(os_activity_stream_entry_t entry, int error){
 	
@@ -89,26 +74,11 @@ BOOL handleStreamEntry(os_activity_stream_entry_t entry, int error){
 	 
 		 if (entry->type==OS_ACTIVITY_STREAM_TYPE_ACTIVITY_CREATE){
 
-		 	// here we can catch activity creation and assingment to entries... 
-		 	// we need to map them by keeping entry_id and parent_id, se we can refer to them later 
-		 	// in orderto find the activity name by its id
-		 	//
-			// Alternatively, we can log them as messages like we do below, 
-			// and pass the value "Activity" as level, like the "log" command line tool does on mac
-			
-   			//printf("OS_ACTIVITY_STREAM_TYPE_ACTIVITY_CREATE entry->activity_id:%d parent_id:%d name:%s\n",(int)entry->activity_id,(int)entry->parent_id,entry->activity_create.name);
-   			
-   			/*
-   				//std::lock_guard<std::mutex> locker(m_activity_info_mutex);
-        		m_activity_map.insert(std::make_pair(entry->activity_id,ActivityInfo(entry->activity_create.name,entry->activity_id, entry->parent_id)));
-        		// or simply use C methods to map the values...
-        	*/
     	  }
     
     
 		if (entry->type==OS_ACTIVITY_STREAM_TYPE_LOG_MESSAGE) {
 
-		  	//printf("received log message: (activity id=%d, parent id=%d, tid %d) format %s\n",(int)entry->activity_id, (int)entry->parent_id, (int)entry->log_message.thread,entry->log_message.format ? entry->log_message.format : "<invalid-format>");
 			os_log_message_t log_message = &entry->log_message;
 			
 		 
@@ -118,7 +88,7 @@ BOOL handleStreamEntry(os_activity_stream_entry_t entry, int error){
 			time_t curtime;
 			gettimeofday(&tv, NULL); 
 			curtime=tv.tv_sec;
-			strftime(timebuffer,30,"%b %e %T",localtime(&curtime));
+			strftime(timebuffer,30,"%T",localtime(&curtime));
 			
 			// Get hostname
 			char hostname[64];
@@ -171,12 +141,11 @@ BOOL handleStreamEntry(os_activity_stream_entry_t entry, int error){
 					category=(char *)log_message->category;
 				}
 
-				//printf("%s %s "BOLDWHITE"%s(%s)"RESET"[%d]: %s\n",timebuffer,hostname,(char *)procname,category,entry->pid,message);
 				if(category && subsystemInfo){
-					printf("%s %s %s(%s.%s)[%d]%s: %s\n",timebuffer,hostname,(char *)procname,subsystem,category,entry->pid,levelInfo?level:"",messageText);
+					printf("%s %s ""\033[1;36m""%s(%s.%s)""\033[1;37m""[%d]%s: %s\x1b[0m\n",hostname,timebuffer,(char *)procname,subsystem,category,entry->pid,levelInfo?level:"",messageText);
 				}
 				else{
-					printf("%s %s %s[%d]%s: %s\n",timebuffer,hostname,(char *)procname,entry->pid,levelInfo?level:"",messageText);
+					printf("%s %s ""\033[1;36m""%s""\033[1;37m""[%d]%s: %s\x1b[0m\n",hostname,timebuffer,(char *)procname,entry->pid,levelInfo?level:"",messageText);
 				}
 				
 			}
@@ -191,16 +160,15 @@ static void NoteExitKQueueCallback(CFFileDescriptorRef f,CFOptionFlags callBackT
 {
     struct kevent   event;
     (void) kevent( CFFileDescriptorGetNativeDescriptor(f), NULL, 0, &event, 1, NULL);
-    NSLog(@" === os_log: monitored pid [%d] terminated", (int) (pid_t) event.ident);
+    NSLog(@" === oslog: monitored pid [%d] terminated", (int) (pid_t) event.ident);
     exit(0);
-    // You've been notified!
 }
 
 int main(int argc, char **argv, char **envp) {
 
 
 	if (!LookupSPICalls()){
-		printf("\tError: Could not find os_log required functions. iOS >=10 is required.\n");
+		printf("\tError: Could not find oslog required functions. iOS >=10 is required.\n");
 		return -1;
 	}
 
@@ -213,8 +181,7 @@ int main(int argc, char **argv, char **envp) {
 		switch (event) {
 
 			case OS_ACTIVITY_STREAM_EVENT_STARTED:
-			  	//printf("received stream event: OS_ACTIVITY_STREAM_EVENT_STARTED, stream %p.\n",(void *)stream);
-				char timebuffer[30]; 
+				char timebuffer[30];
 				struct timeval tv;
 				time_t curtime;
 				gettimeofday(&tv, NULL); 
@@ -222,23 +189,19 @@ int main(int argc, char **argv, char **envp) {
 				strftime(timebuffer,30,"%b %e %T",localtime(&curtime));
 				char hostname[64];
 				gethostname(hostname,sizeof(hostname));
-			  	printf("%s %s: === os_log stream started ===\n",timebuffer,hostname);
+			  	printf("%s %s: ======\n",timebuffer,hostname);
 			  	canPrint=YES;
 			  	break;
 			case OS_ACTIVITY_STREAM_EVENT_STOPPED:
-			 	//printf("received stream event: OS_ACTIVITY_STREAM_EVENT_STOPPED, stream %p.\n",(void *)stream);
-				printf("=== os_log stream stopped ===\n");
+				printf("======\n");
 			  	break;
 			case OS_ACTIVITY_STREAM_EVENT_FAILED:
-				printf("=== os_log stream failed ===\n");
-			 	//printf("received stream event: OS_ACTIVITY_STREAM_EVENT_FAILED, stream %p.\n",(void *)stream);
+				printf("======\n");
 			 	break;
 			case OS_ACTIVITY_STREAM_EVENT_CHUNK_STARTED:
-			 	//printf("received stream event: OS_ACTIVITY_STREAM_EVENT_CHUNK_STARTED, stream %p.\n",(void *)stream);
 			 	break;
 			case OS_ACTIVITY_STREAM_EVENT_CHUNK_FINISHED:
-				printf("=== os_log stream chunk finished ===\n");
-			 	//printf("received stream event: OS_ACTIVITY_STREAM_EVENT_CHUNK_FINISHED, stream %p.\n",(void *)stream);
+				printf("======\n");
 			  	break;
 			  	
 		}
@@ -334,34 +297,19 @@ int main(int argc, char **argv, char **envp) {
 		return 0;
 	}
 		
-	// Create the stream.
 	os_activity_stream_t activity_stream = (*s_os_activity_stream_for_pid)(filterPid, activity_stream_flags , block);
 	
 	if (filterPid!=-1){
-		
-		// Add kernel queue to listen for pid termination event
-		// it seems better to grep for your process than monitoring a specific pid because if the process dies, it would mean the end of monitoring.
-		// we could hang around and re-open an os_log connection when a process with the "same name" appears, but it doesn't seem reasonable.
-		
-		// The code below will make sure we are notified if a specific-monitored (with -p) pid dies
-		// so that we exit our application in the NoteExitKQueueCallback callback.
-		
+				
 		int                     kq;
 		struct kevent           changes;
 		CFFileDescriptorContext context = { 0, NULL, NULL, NULL, NULL };
 		CFRunLoopSourceRef      rls;
 
-		// Create the kqueue and set it up to watch for SIGCHLD. Use the 
-		// new-in-10.5 EV_RECEIPT flag to ensure that we get what we expect.
-
 		kq = kqueue();
 
 		EV_SET(&changes, filterPid, EVFILT_PROC, EV_ADD | EV_RECEIPT, NOTE_EXIT, 0, NULL);
 		(void) kevent(kq, &changes, 1, &changes, 1, NULL);
-
-		// Wrap the kqueue in a CFFileDescriptor (new in Mac OS X 10.5!). Then 
-		// create a run-loop source from the CFFileDescriptor and add that to the 
-		// runloop.
 
 		CFFileDescriptorRef noteExitKQueueRef = CFFileDescriptorCreate(NULL, kq, true, NoteExitKQueueCallback, &context);
 		rls = CFFileDescriptorCreateRunLoopSource(NULL, noteExitKQueueRef, 0);
@@ -372,18 +320,14 @@ int main(int argc, char **argv, char **envp) {
 	
 	}	
 
-	// Specify the stream-related event handler.
 	(*s_os_activity_stream_set_event_handler)(activity_stream, stream_event_block);
 
-	// Start the stream.
-	(*s_os_activity_stream_resume)(activity_stream);	
+	(*s_os_activity_stream_resume)(activity_stream);
 	
-	// Run
 	[[NSRunLoop currentRunLoop] run];
 	 
 	 
-	 (*s_os_activity_stream_cancel)(activity_stream);	
-	// Exit
-
+	 (*s_os_activity_stream_cancel)(activity_stream);
+    
 	return 0;
 }
